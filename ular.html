@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake Game</title>
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(90deg, #DC143C, #00FFFF, #FFB6C1, #DC143C);
+    overflow: hidden;
+    animation: gradien-animasi 10s ease infinite;
+    cursor: url(1.png), auto;
+  }
+
+  #game-container {
+    position: relative;
+  }
+
+  #title {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    color: solid black;
+  }
+
+  canvas {
+    border: 2px solid white;
+  }
+
+  #score {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 25px;
+    color: solid blaxk;
+  }
+
+  #arrow-indicator {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    color: solid black;
+  }
+
+  .difficulty-buttons {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+  }
+
+  .difficulty-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(90deg, #DC143C, #00FFFF, #FFB6C1);
+    color: white;
+  }
+
+  .difficulty-button:hover {
+    background: linear-gradient(90deg, #00FF00, #8A2BE2);
+  }
+</style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="title">Ridwan
+      <br>[tekan panah keyboard]</div>
+    <canvas id="gameCanvas" width="600" height="600"></canvas>
+    <div id="score">Score: 0</div>
+    <div id="arrow-indicator">↑ ↓ ← →</div>
+    
+
+  </div>
+<div class="difficulty-buttons">
+      <button class="difficulty-button" id="easy">Mudah</button>
+      <button class="difficulty-button" id="normal">Normal</button>
+      <button class="difficulty-button" id="hard">Sulit</button>
+    </div>
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const gameContainer = document.getElementById('game-container');
+  const easyButton = document.getElementById('easy');
+  const normalButton = document.getElementById('normal');
+  const hardButton = document.getElementById('hard');
+
+  const tileSize = 20;
+  let snake = [{ x: 10, y: 10 }];
+  let food = { x: Math.floor(Math.random() * (canvas.width / tileSize)), y: Math.floor(Math.random() * (canvas.height / tileSize)) };
+  let dx = 0;
+  let dy = 0;
+  let score = 0;
+  let gameInterval;
+
+  function drawSnake() {
+    ctx.fillStyle = 'green';
+    snake.forEach(segment => {
+      ctx.fillRect(segment.x * tileSize, segment.y * tileSize, tileSize, tileSize);
+    });
+  }
+
+  function drawFood() {
+    ctx.fillStyle = 'yellow';
+    ctx.fillRect(food.x * tileSize, food.y * tileSize, tileSize, tileSize);
+  }
+
+  function moveSnake() {
+    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y) {
+      score++;
+      generateFood();
+    } else {
+      snake.pop();
+    }
+  }
+
+  function generateFood() {
+    food = { x: Math.floor(Math.random() * (canvas.width / tileSize)), y: Math.floor(Math.random() * (canvas.height / tileSize)) };
+  }
+
+  function checkCollision() {
+    if (snake.some(segment => segment.x === snake[0].x && segment.y === snake[0].y && segment !== snake[0])) {
+      clearInterval(gameInterval);
+      alert('Game Over! Your score: ' + score);
+    }
+    if (snake[0].x < 0 || snake[0].x >= canvas.width / tileSize || snake[0].y < 0 || snake[0].y >= canvas.height / tileSize) {
+      clearInterval(gameInterval);
+      alert('Game Over! Your score: ' + score);
+    }
+  }
+
+  function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawSnake();
+    drawFood();
+    moveSnake();
+    checkCollision();
+    document.getElementById('score').innerHTML = 'Score: ' + score;
+  }
+
+  function startGame(interval) {
+    document.getElementById('score').innerHTML = 'Score: ' + score;
+    clearInterval(gameInterval);
+    gameInterval = setInterval(gameLoop, interval);
+  }
+
+  document.addEventListener('keydown', (event) => {
+    switch (event.key) {
+      case 'ArrowUp':
+        if (dy !== 1) { // Avoid moving opposite direction
+          dx = 0;
+          dy = -1;
+        }
+        break;
+      case 'ArrowDown':
+        if (dy !== -1) { // Avoid moving opposite direction
+          dx = 0;
+          dy = 1;
+        }
+        break;
+      case 'ArrowLeft':
+        if (dx !== 1) { // Avoid moving opposite direction
+          dx = -1;
+          dy = 0;
+        }
+        break;
+      case 'ArrowRight':
+        if (dx !== -1) { // Avoid moving opposite direction
+          dx = 1;
+          dy = 0;
+        }
+        break;
+    }
+  });
+
+  easyButton.addEventListener('click', () => {
+    startGame(150); // Mudah: Kecepatan lamban
+  });
+
+  normalButton.addEventListener('click', () => {
+    startGame(100); // Normal: Kecepatan normal
+  });
+
+  hardButton.addEventListener('click', () => {
+    startGame(50); // Sulit: Kecepatan cepat
+  });
+
+  startGame(100); // Start the game loop with normal speed
+</script>
+</body>
+</html>
